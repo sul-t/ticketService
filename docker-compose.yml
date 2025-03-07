@@ -1,0 +1,6 @@
+services:
+    auth:
+        container_name: auth
+        build: ./auth
+        ports:
+            - 8000:8000
