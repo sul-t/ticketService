@@ -6,6 +6,8 @@ services:
             - 8000:8000
         depends_on:
             - mongodb
+        labels:
+            - "traefik.http.routers.auth.rule=Host(`localhost`)"
 
     mongodb:
         image: mongo:latest
@@ -19,6 +21,15 @@ services:
             MONGO_INITDB_ROOT_PASSWORD: "\"${DB_PASSWORD}\""
         volumes:
             - my_db_data:/data/db   
+
+    reverse-proxy:
+        image: traefik:v3.3
+        command: --api.insecure=true --providers.docker
+        ports:
+            - "80:80"
+            - "8080:8080"
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
     
 
 volumes: 
