@@ -1,0 +1,37 @@
+services:
+    auth:
+        container_name: auth
+        build: ./auth
+        ports:
+            - 8000:8000
+        depends_on:
+            - mongodb
+        labels:
+            - "traefik.http.routers.auth.rule=Host(`localhost`)"
+
+    mongodb:
+        image: mongo:latest
+        container_name: auth_db
+        restart: always
+        env_file: ./auth/.env
+        ports:
+            - "${DB_PORT}:27017"
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: "\"${DB_USER}\""
+            MONGO_INITDB_ROOT_PASSWORD: "\"${DB_PASSWORD}\""
+        volumes:
+            - my_db_data:/data/db   
+
+    reverse-proxy:
+        image: traefik:v3.3
+        command: --api.insecure=true --providers.docker
+        ports:
+            - "80:80"
+            - "8080:8080"
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+    
+
+volumes: 
+    my_db_data:
+
