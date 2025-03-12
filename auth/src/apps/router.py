@@ -1,51 +1,45 @@
 from fastapi import APIRouter, HTTPException, status, Response, Depends
 
-from src.core.auth import get_password_hash, verify_password, create_jwt_token, get_current_user
-
+from src.core.auth import hash_password, verify_password, create_jwt_token, get_current_user
 from src.core.dao import UsersDAO
 from src.core.schemas import SUserRegister
 from src.core.model import User
 
 
-
 router = APIRouter(prefix='', tags=['Auth'])
 
 
-@router.post('/singup')
-async def signup(user: SUserRegister):
-    first_or_none_user = await UsersDAO.find_user(name=user.name)
+@router.post("/signup", status_code=status.HTTP_201_CREATED)
+async def signup(response: Response, user: SUserRegister):
+    """Регистрация нового пользователя."""
+    if await UsersDAO.get_user_by_name(name=user.name):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Пользователь уже существует!")
 
-    if first_or_none_user:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail='Пользователь уже существует!'
-        )
-    
+    user_added = await UsersDAO.add_user(name=user.name, password=hash_password(user.password))
 
-    user.password = get_password_hash(password=user.password)
-    await UsersDAO.create_user(name=user.name, password=user.password)
+    jwt_token = create_jwt_token({"sub": str(user_added.id)})
+    response.set_cookie(key="user_jwt_token", value=jwt_token, httponly=True)
 
-    return {"message": "Пользователь успешно создан!"}
+    return {"jwt_token": jwt_token}
 
-@router.post('/signin')
-async def signin(responce: Response, user: SUserRegister):
-    first_or_none_user = await UsersDAO.find_user(name=user.name)
 
-    if not first_or_none_user or not verify_password(user.password, first_or_none_user.password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail='Неверная почта или пароль!'
-        )
-    
+@router.post("/signin")
+async def signin(response: Response, user: SUserRegister):
+    """Авторизация пользователя."""
+    user_from_db = await UsersDAO.get_user_by_name(name=user.name)
 
-    jwt_token = create_jwt_token({"sub": str(first_or_none_user.id)})
-    responce.set_cookie(key="user_jwt_token", value=jwt_token, httponly=True)
+    if not user_from_db or not verify_password(user.password, user_from_db.password):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Неверная почта или пароль!")
 
-    return {'jwt_token': jwt_token}
+    jwt_token = create_jwt_token({"sub": str(user_from_db.id)})
+    response.set_cookie(key="user_jwt_token", value=jwt_token, httponly=True)
 
-@router.get('/')
-async def check_jwt(user_data: User = Depends(get_current_user)):
-    return user_data
+    return {"jwt_token": jwt_token}
+
+
+@router.get("/")
+async def check_jwt(user: User = Depends(get_current_user)):
+    return user.name
 
     
 

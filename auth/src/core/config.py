@@ -2,10 +2,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
 
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
-
-
-
 class Setting(BaseSettings):
     DB_USER: str
     DB_PASSWORD: str
@@ -15,13 +11,14 @@ class Setting(BaseSettings):
     SECRET_KEY: str
     ALGORITHM: str
 
-    model_config = SettingsConfigDict(env_file=BASE_DIR / '.env')
+    model_config = SettingsConfigDict(env_file=Path(__file__).resolve().parents[2] / '.env')
 
 
-settings = Setting()
+config = Setting()
 
-def get_db_url():
-    return (f'mongodb://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}')
 
-def get_auth_data():
-    return {"secret_key": settings.SECRET_KEY, "algorithm": settings.ALGORITHM}
+def get_db_uri() -> str:
+    return f'mongodb://{config.DB_USER}:{config.DB_PASSWORD}@{config.DB_HOST}:{config.DB_PORT}'
+
+def get_auth_data() -> dict[str, str]:
+    return {'secret_key': config.SECRET_KEY, 'algorithm': config.ALGORITHM}

@@ -1,9 +1,8 @@
 from beanie import Document, Indexed
 
 
-
 class User(Document):
-    name: Indexed(str)            
+    name: str = Indexed(unique=True)        
     role: str              
     password: str         
 

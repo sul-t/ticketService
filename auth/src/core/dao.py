@@ -1,45 +1,28 @@
-from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
-from beanie.operators import In
 from bson.objectid import ObjectId
 
 from src.core.model import User
 from src.core.database import client
 
 
-
 class UsersDAO:
     model = User
 
     @classmethod
-    async def create_user(cls, name, password):
+    async def _init(cls):
         await init_beanie(database=client['ticket'], document_models=[cls.model])
-
-        user = cls.model(name=name, role='user', password=password)
-        await user.insert()
 
     @classmethod
-    async def find_user(cls, name):
-        await init_beanie(database=client['ticket'], document_models=[cls.model])
+    async def add_user(cls, name: str, password: str):
+        await cls._init()
+        return await cls.model(name=name, role='user', password=password).insert()
 
-        first_or_none_user = await cls.model.find_one(
-            cls.model.name == name
-        )
-
-        return first_or_none_user
-    
     @classmethod
-    async def find_user_by_id(cls, user_id):
-        await init_beanie(database=client['ticket'], document_models=[cls.model])
+    async def get_user_by_name(cls, name: str):
+        await cls._init()
+        return await cls.model.find_one(cls.model.name == name)
 
-        data = await cls.model.find({}).to_list()
-        for result in data:
-            print(result)
-
-        first_or_none_user = await cls.model.find_one({"_id": ObjectId(user_id)})
-
-        return first_or_none_user
-    
-
-
-
+    @classmethod
+    async def get_user_by_id(cls, user_id: str):
+        await cls._init()
+        return await cls.model.find_one({'_id': ObjectId(user_id)})

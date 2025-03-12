@@ -8,10 +8,10 @@ services:
             - "8000:8000"
         depends_on:
             - mongodb
-        labels:
-            - "traefik.http.routers.auth.rule=Host(`localhost`)"
-            - "traefik.http.middlewares.auth-mv.forwardauth.address=http://auth/check_jwt"
-            - "traefik.http.routers.auth.middlewares=auth-mv@docker"
+        # labels:
+        #     - "traefik.http.routers.auth.rule=Host(`localhost`)"
+            # - "traefik.http.middlewares.auth-mv.forwardauth.address=http://auth/check_jwt"
+            # - "traefik.http.routers.auth.middlewares=auth-mv@docker"
 
     mongodb:
         image: mongo:latest
@@ -37,6 +37,18 @@ services:
             - "8080:8080"
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
+
+    nginx:
+        image: nginx:latest
+        container_name: nginx_protected
+        volumes:
+            - ./nginx:/usr/share/nginx/html
+        labels:
+            - "traefik.http.routers.nginx.rule=Host(`localhost`)"
+            - "traefik.http.services.nginx.loadbalancer.server.port=80"
+            - "traefik.http.middlewares.auth-mv.forwardauth.address=http://auth:8000/"
+            - "traefik.http.routers.nginx.middlewares=auth-mv@docker"
+
 
 volumes:
     my_db_data:
