@@ -1,13 +1,17 @@
+# version: "3.8"
+
 services:
     auth:
         container_name: auth
         build: ./auth
         ports:
-            - 8000:8000
+            - "8000:8000"
         depends_on:
             - mongodb
         labels:
             - "traefik.http.routers.auth.rule=Host(`localhost`)"
+            - "traefik.http.middlewares.auth-mv.forwardauth.address=http://auth/check_jwt"
+            - "traefik.http.routers.auth.middlewares=auth-mv@docker"
 
     mongodb:
         image: mongo:latest
@@ -15,23 +19,24 @@ services:
         restart: always
         env_file: ./auth/.env
         ports:
-            - "${DB_PORT}:27017"
+            - "${DB_PORT:-27017}:27017"
         environment:
             MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
             MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
         volumes:
-            - my_db_data:/data/db   
+            - my_db_data:/data/db
 
     reverse-proxy:
         image: traefik:v3.3
-        command: --api.insecure=true --providers.docker
+        command:
+            - "--api.insecure=true"
+            - "--providers.docker"
+            - "--accesslog=true"
         ports:
             - "80:80"
             - "8080:8080"
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
-    
 
-volumes: 
+volumes:
     my_db_data:
-

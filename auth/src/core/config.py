@@ -11,6 +11,7 @@ class Setting(BaseSettings):
     DB_PASSWORD: str
     DB_HOST: str
     DB_PORT: str
+    DB_NAME: str
     SECRET_KEY: str
     ALGORITHM: str
 

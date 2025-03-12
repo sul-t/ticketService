@@ -5,8 +5,8 @@ from fastapi import Request, HTTPException, status, Depends
 from jose import jwt, JWTError
 from datetime import datetime, timedelta, timezone
 
-from auth.src.core.config import get_auth_data
-from auth.src.core.dao import UsersDAO
+from src.core.config import get_auth_data
+from src.core.dao import UsersDAO
 
 
 
