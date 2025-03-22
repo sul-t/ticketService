@@ -1,28 +1,23 @@
-from beanie import init_beanie
 from bson.objectid import ObjectId
 
+from motor.motor_asyncio import AsyncIOMotorClient
+from fastapi import Depends
+
+from src.core.database import init_mongo_db
 from src.core.model import User
-from src.core.database import client
 
 
 class UsersDAO:
     model = User
 
-    @classmethod
-    async def _init(cls):
-        await init_beanie(database=client['ticket'], document_models=[cls.model])
+    def __init__(self, client: AsyncIOMotorClient = Depends(init_mongo_db)):
+        self.client = client
 
-    @classmethod
-    async def add_user(cls, name: str, password: str):
-        await cls._init()
-        return await cls.model(name=name, role='user', password=password).insert()
+    async def add_user(self, name: str, password: str) -> User:
+        return await self.model(name=name, role="user", password=password).insert()
 
-    @classmethod
-    async def get_user_by_name(cls, name: str):
-        await cls._init()
-        return await cls.model.find_one(cls.model.name == name)
+    async def get_user_by_name(self, name: str) -> User | None:
+        return await self.model.find_one(self.model.name == name)
 
-    @classmethod
-    async def get_user_by_id(cls, user_id: str):
-        await cls._init()
-        return await cls.model.find_one({'_id': ObjectId(user_id)})
+    async def get_user_by_id(self, user_id: str) -> User | None:
+        return await self.model.find_one({"_id": ObjectId(user_id)})
