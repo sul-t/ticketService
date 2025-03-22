@@ -21,35 +21,51 @@ dependencies = [
     "pytest-trio>=0.8.0",
     "python-jose>=3.4.0",
     "requests>=2.32.3",
+    "testcontainers[mongodb]>=4.9.2",
+    "types-passlib>=1.7.7.20250319",
+    "types-python-jose>=3.4.0.20250224",
     "uvicorn>=0.34.0",
 ]
 
 [tool.pytest.ini_options]
     asyncio_mode = "auto"
+    filterwarnings = [
+        "ignore: The event_loop fixture provided by pytest-asyncio has been redefined.*:DeprecationWarning",
+        "ignore: Setting per-request cookies.*:DeprecationWarning",
+        "ignore: 'crypt' is deprecated and slated for removal.*:DeprecationWarning",
+    ]
+    markers = [
+        "e2e",
+        "unit",
+    ]
 
 [dependency-groups]
 dev = [
+    "debugpy>=1.8.13",
+    "mypy>=1.15.0",
     "ruff>=0.11.0",
 ]
 
 [tool.ruff]
-    line-length = 100
+    line-length = 130
     target-version = "py311"
 
 [tool.ruff.lint]
     select = [
-        "E",  # pycodestyle errors
-        "W",  # pycodestyle warnings
-        "F",  # pyflakes
-        "I",  # isort
-        "B",  # flake8-bugbear
-        "C4",  # flake8-comprehensions
+        "E",  
+        "F", 
+        "W", 
+        "I",  
+        "B",  
+        "C",  
+        "UP", 
+        "PL",  
+        "RUF",
     ]
-    ignore = [
-        "E501",  # line too long, handled by black
-        "B008",  # do not perform function calls in argument defaults
-        "C901",  # too complex
-        "W191",  # indentation contains tabs
-        "B904",
-        "E402",
-    ]
+
+[tool.ruff.lint.isort]
+    known-first-party = ["src"]
+    lines-after-imports = 2
+    combine-as-imports = true
+    force-sort-within-sections = true
+    order-by-type = true
