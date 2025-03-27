@@ -13,12 +13,12 @@ services:
         image: mongo:latest
         container_name: auth_db
         restart: always
-        env_file: ./auth/.env
+        # env_file: ./auth/.env
         ports:
-            - "${DB_PORT:-27017}:27017"
+            - "${DB_AUTH_PORT:-27017}:27017"
         environment:
-            MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
-            MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
+            MONGO_INITDB_ROOT_USERNAME: ${DB_AUTH_USER}
+            MONGO_INITDB_ROOT_PASSWORD: ${DB_AUTH_PASSWORD}
         volumes:
             - my_db_data:/data/db
 
@@ -49,6 +49,8 @@ services:
     events:
         container_name: events
         build: ./events
+        command: >
+            sh -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
         ports:
             - "8001:8000"
         labels:
@@ -56,6 +58,38 @@ services:
             - "traefik.http.services.events.loadbalancer.server.port=8000"
             - "traefik.http.middlewares.auth-mv.forwardauth.address=http://auth:8000/"
             - "traefik.http.routers.events.middlewares=auth-mv@docker"
+            - "traefik.http.middlewares.auth-mv.forwardauth.authResponseHeaders=X-User-Role"
+
+            # - "traefik.http.routers.events_docs.rule=Host(`localhost`) && PathPrefix(`/events/docs`)"
+            # - "traefik.http.services.events_docs.loadbalancer.server.port=8001"
+        depends_on:
+            events_db:
+                condition: service_healthy
+
+    rabbitmq:
+        image: rabbitmq:management-alpine
+        container_name: rabbitmq
+        restart: always
+        ports:
+            - 5672:5672
+            - 15672:15672
+        
+    events_db:
+        image: postgres:alpine
+        container_name: events_db
+        restart: always
+        environment:
+            POSTGRES_USER: ${DB_EVENT_USER}
+            POSTGRES_PASSWORD: ${DB_EVENT_PASSWORD}
+            POSTGRES_DB: ${DB_EVENT_NAME}
+        ports:
+            - ${DB_EVENT_PORT}:5432
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U ${DB_EVENT_USER} -d ${DB_EVENT_NAME}"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 30s
 
 
 volumes:
