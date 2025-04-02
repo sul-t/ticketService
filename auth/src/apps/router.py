@@ -1,17 +1,18 @@
-from fastapi import APIRouter, HTTPException, status, Response, Depends
+from typing import Annotated
 
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 
-from src.core.auth import hash_password, verify_password, create_jwt_token, get_current_user
+from src.core.auth import create_jwt_token, get_current_user, hash_password, verify_password
 from src.core.dao import UsersDAO
-from src.core.schemas import SUserRegister
 from src.core.model import User
+from src.core.schemas import SUserRegister
 
 
 router = APIRouter(prefix="", tags=["Auth"])
 
 
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
-async def signup(response: Response, user: SUserRegister, user_dao: UsersDAO = Depends(UsersDAO)) -> dict[str, str]:
+async def signup(response: Response, user: SUserRegister, user_dao: Annotated[UsersDAO, Depends(UsersDAO)]) -> dict[str, str]:
     if await user_dao.get_user_by_name(name=user.name):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Пользователь уже существует!")
 
@@ -24,7 +25,7 @@ async def signup(response: Response, user: SUserRegister, user_dao: UsersDAO = D
 
 
 @router.post("/signin")
-async def signin(response: Response, user: SUserRegister, user_dao: UsersDAO = Depends(UsersDAO)) -> dict[str, str]:
+async def signin(response: Response, user: SUserRegister, user_dao: Annotated[UsersDAO, Depends(UsersDAO)]) -> dict[str, str]:
     user_from_db = await user_dao.get_user_by_name(name=user.name)
 
     if not user_from_db or not verify_password(user.password, user_from_db.password):
@@ -37,6 +38,6 @@ async def signin(response: Response, user: SUserRegister, user_dao: UsersDAO = D
 
 
 @router.get("/")
-async def check_jwt(response: Response, user: User = Depends(get_current_user)) -> str:
-    response.headers["X-User-Role"] = 'user'
-    return user.role
+async def check_jwt(response: Response, user: Annotated[User, Depends(get_current_user)]) -> str:
+    response.headers["X-User-Role"] = user.role
+    return user.name

@@ -1,5 +1,6 @@
-import pytest
 from django.core.cache import cache
+import pytest
+
 
 # fmt: off
 pytest_plugins = [

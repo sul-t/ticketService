@@ -1,19 +1,18 @@
 from datetime import date
 
 from fastapi import Depends
-
-from sqlalchemy import update, delete, select, and_
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import and_, delete, select, update
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.database import Base, async_session
 from src.core.models import Event
-from src.core.schemas import SEvent
 
 
 class EventDAO(Base):
     def __init__(self, session: AsyncSession = Depends(async_session)):
         self.session = session
+
 
     async def create_event(self, event_data: Event) -> Event | None:
         try:
@@ -26,20 +25,15 @@ class EventDAO(Base):
             print(f"Ошибка добавления мероприятия: {e}")
 
             return None
-        
-        
+
+
     async def update_event(self, event_id: int, event_data: dict) -> Event | None:
         try:
-            stmt = (
-                update(Event)
-                .where(Event.id == event_id)
-                .values(**event_data)
-                .returning(Event)
-            )
+            stmt = update(Event).where(Event.id == event_id).values(**event_data).returning(Event)
             result = await self.session.execute(stmt)
             await self.session.commit()
 
-            return result.fetchone()
+            return result.scalars().first()
         except SQLAlchemyError as e:
             await self.session.rollback()
             print(f"Ошибка обновления мероприятия: {e}")
@@ -53,10 +47,10 @@ class EventDAO(Base):
             result = await self.session.execute(stmt)
             await self.session.commit()
 
-            return result
+            return result.scalars().first()
         except SQLAlchemyError as e:
             await self.session.rollback()
-            print(f'Ошибка при удалении мероприятия: ', {e})
+            print("Ошибка при удалении мероприятия: ", {e})
 
             return None
 
@@ -66,16 +60,15 @@ class EventDAO(Base):
         result = await self.session.execute(stmt)
 
         return result.scalar_one_or_none()
-    
+
 
     async def find_event_by_date(self, date_from: date, date_to: date, page: int, items_count: int):
         stmt = (
             select(Event)
-            .where(and_(Event.event_date >= date_from, Event.event_date <= date_to))
+            .where(and_(Event.event_date > date_from, Event.event_date <= date_to, Event.available_tickets > 0))
             .offset((page - 1) * items_count)
             .limit(items_count)
         )
 
         result = await self.session.execute(stmt)
         return result.scalars().all()
-

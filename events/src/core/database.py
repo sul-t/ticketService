@@ -1,5 +1,5 @@
-from sqlalchemy.orm import DeclarativeBase, declared_attr, Mapped, mapped_column
 from sqlalchemy.ext.asyncio import AsyncAttrs, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import DeclarativeBase, Mapped, declared_attr, mapped_column
 from sqlalchemy.types import Integer
 
 from config import get_db_uri
@@ -19,7 +19,6 @@ class Base(DeclarativeBase, AsyncAttrs):
 
     @declared_attr.directive
     def __tablename__(self) -> str:
-        return f'{self.__name__.lower()}s'
-    
+        return f"{self.__name__.lower()}s"
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    

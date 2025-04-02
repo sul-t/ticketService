@@ -1,10 +1,9 @@
-from datetime import datetime, timezone
-
-import pytest
+from datetime import UTC, datetime
 
 from fastapi import status
 from httpx import AsyncClient
 from jose import jwt
+import pytest
 
 from src.core.config import get_auth_data
 from src.core.model import User
@@ -60,7 +59,7 @@ async def test_auth_unhappy_path_found_user(async_client: AsyncClient) -> None:
     user_data = await User(name="user@ya.ru", role="user", password="admin").insert()
     await User.find({}).delete_many()
 
-    jwt_token = create_jwt_token(user_id=str(user_data.id), exp=datetime.now(timezone.utc))
+    jwt_token = create_jwt_token(user_id=str(user_data.id), exp=datetime.now(UTC))
 
     response = await async_client.get(url="/", cookies={"user_jwt_token": jwt_token})
     assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -69,7 +68,7 @@ async def test_auth_unhappy_path_found_user(async_client: AsyncClient) -> None:
 
 @pytest.mark.asyncio
 async def test_auth_unhappy_path_found_user_id(async_client: AsyncClient) -> None:
-    jwt_token = create_jwt_token(exp=datetime.now(timezone.utc))
+    jwt_token = create_jwt_token(exp=datetime.now(UTC))
 
     response = await async_client.get(url="/", cookies={"user_jwt_token": jwt_token})
     assert response.status_code == status.HTTP_403_FORBIDDEN

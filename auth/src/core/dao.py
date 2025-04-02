@@ -1,7 +1,8 @@
-from bson.objectid import ObjectId
+from typing import Annotated
 
-from motor.motor_asyncio import AsyncIOMotorClient
+from bson.objectid import ObjectId
 from fastapi import Depends
+from motor.motor_asyncio import AsyncIOMotorClient
 
 from src.core.database import init_mongo_db
 from src.core.model import User
@@ -10,7 +11,7 @@ from src.core.model import User
 class UsersDAO:
     model = User
 
-    def __init__(self, client: AsyncIOMotorClient = Depends(init_mongo_db)):
+    def __init__(self, client: Annotated[AsyncIOMotorClient, Depends(init_mongo_db)]):
         self.client = client
 
     async def add_user(self, name: str, password: str) -> User:

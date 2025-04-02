@@ -1,20 +1,19 @@
 import asyncio
 from logging.config import fileConfig
+from os.path import dirname
+import sys
 
+from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from alembic import context
-
-import sys
-from os.path import dirname
 
 sys.path.insert(0, dirname(dirname(__file__)))
 
-from src.core.database import Base
 from config import get_db_uri
-from src.core.models import Event
+from src.core.database import Base
+
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

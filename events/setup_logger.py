@@ -1,6 +1,6 @@
+from enum import StrEnum
 import logging
 
-from enum import StrEnum
 
 LOG_LEVEL = logging.WARNING
 LOG_FORMAT_DEBUG = "%(levelname)s:%(message)s:%(pathname)s:%(funcName)s:%(lineno)d"
@@ -18,12 +18,12 @@ def configure_logging():
 
     if log_level not in log_levels:
         logging.basicConfig(level=LogLevels.error)
-        return 
-    
+        return
+
     if log_level == LogLevels.debug:
         logging.basicConfig(level=log_level, format=LOG_FORMAT_DEBUG)
         return
-    
+
     logging.basicConfig(level=log_level)
 
-    logging.getLogger('slack_sdk.web.base_client').setLevel(logging.CRITICAL)
+    logging.getLogger("slack_sdk.web.base_client").setLevel(logging.CRITICAL)

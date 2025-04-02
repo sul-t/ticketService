@@ -7,4 +7,4 @@ WORKDIR /events
 
 RUN uv sync --frozen
 
-# CMD ["uvicorn", "main:app", "--reload", "--port", "8000", "--host", "0.0.0.0"]
+CMD sh -c "alembic upgrade head && uvicorn main:app --reload --port 8000 --host 0.0.0.0"

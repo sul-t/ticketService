@@ -42,26 +42,90 @@ dev = [
     "ruff>=0.11.0",
 ]
 
+
+# Ruff settings
 [tool.ruff]
+    # Exclude a variety of commonly ignored directoryes 
+    exclude = [
+        ".bzr",
+        ".direnv",
+        ".eggs",
+        ".git",
+        ".git-rewrite",
+        ".hg",
+        ".ipynb_checkpoints",
+        ".mypy_cache",
+        ".nox",
+        ".pants.d",
+        ".pyenv",
+        ".pytest_cache",
+        ".pytype",
+        ".ruff_cache",
+        ".svn",
+        ".tox",
+        ".venv",
+        ".vscode",
+        "__pypackages__",
+        "_build",
+        "buck-out",
+        "build",
+        "dist",
+        "node_modules",
+        "site-packages",
+        "venv",
+    ]
+
     line-length = 130
-    target-version = "py311"
+    indent-width = 4
+
+    target-version = "py312"
+
 
 [tool.ruff.lint]
     select = [
-        "E",  
-        "F", 
-        "W", 
-        "I",  
-        "B",  
-        "C",  
+        "E",   
+        "F",  
+        "B",    
+        "Q",   
+        "C90",  
+        "W",   
+        "I",   
         "UP", 
-        "PL",  
-        "RUF",
+        "N",    
+        "PL",   
     ]
+
+    ignore = [
+        "D203", 
+        "D212", 
+        "E501", 
+        "B008",
+        "RUF001",
+    ]
+
+    fixable = ["ALL"]
+    unfixable = ["B"]
+
+
+[tool.ruff.lint.per-file-ignores]
+    "__init__.py" = ["E402"]
+    "tests/*" = ["E402", "D"]
+
+
+[tool.ruff.format]
+    quote-style = "double" 
+    indent-style = "space" 
+    skip-magic-trailing-comma = false 
+    line-ending = "auto" 
+    docstring-code-format = true 
+    docstring-code-line-length = 72 
+
 
 [tool.ruff.lint.isort]
     known-first-party = ["src"]
     lines-after-imports = 2
-    combine-as-imports = true
+    combine-as-imports = false
     force-sort-within-sections = true
     order-by-type = true
+    case-sensitive = true
+

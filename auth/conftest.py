@@ -1,16 +1,14 @@
-from typing import AsyncGenerator
-
-import pytest
-
-from httpx import AsyncClient, ASGITransport
+from collections.abc import AsyncGenerator
 
 from beanie import init_beanie
+from httpx import ASGITransport, AsyncClient
 from motor.motor_asyncio import AsyncIOMotorClient
+import pytest
 from testcontainers.mongodb import MongoDbContainer
 
 from main import app
-from src.core.model import User
 from src.core.database import init_mongo_db
+from src.core.model import User
 
 
 async def overaide_init_mongo_db(mongo_db_container: MongoDbContainer) -> AsyncGenerator[AsyncIOMotorClient, None]:
