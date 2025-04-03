@@ -1,8 +1,9 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
+from typing import Annotated
 
+from fastapi import Depends, HTTPException, Request, status
+from jose import ExpiredSignatureError, JWTError, jwt
 from passlib.context import CryptContext
-from fastapi import Request, HTTPException, status, Depends
-from jose import jwt, JWTError, ExpiredSignatureError
 
 from src.core.config import get_auth_data
 from src.core.dao import UsersDAO
@@ -22,7 +23,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def create_jwt_token(data: dict) -> str:
     auth_data = get_auth_data()
-    expire = datetime.now(timezone.utc) + timedelta(days=30)
+    expire = datetime.now(UTC) + timedelta(days=30)
     data.update({"exp": expire})
     return jwt.encode(data, auth_data["secret_key"], algorithm=auth_data["algorithm"])
 
@@ -34,7 +35,7 @@ def get_token(request: Request) -> str:
     return token
 
 
-async def get_current_user(token: str = Depends(get_token), user_dao: UsersDAO = Depends(UsersDAO)) -> User:
+async def get_current_user(token: Annotated[str, Depends(get_token)], user_dao: Annotated[UsersDAO, Depends(UsersDAO)]) -> User:
     auth_data = get_auth_data()
 
     try:
@@ -49,7 +50,7 @@ async def get_current_user(token: str = Depends(get_token), user_dao: UsersDAO =
         return user
 
     except ExpiredSignatureError:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Токен истек")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Токен истек") from None
 
     except JWTError:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Не валидный токен!")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Не валидный токен!") from None

@@ -1,27 +1,4 @@
-# version: "3.8"
-
 services:
-    auth:
-        container_name: auth
-        build: ./auth
-        ports:
-            - "8000:8000"
-        depends_on:
-            - mongodb
-
-    mongodb:
-        image: mongo:latest
-        container_name: auth_db
-        restart: always
-        env_file: ./auth/.env
-        ports:
-            - "${DB_PORT:-27017}:27017"
-        environment:
-            MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
-            MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
-        volumes:
-            - my_db_data:/data/db
-
     reverse-proxy:
         image: traefik:v3.3
         container_name: reverse_proxy
@@ -35,28 +12,17 @@ services:
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
 
-    # nginx:
-    #     image: nginx:latest
-    #     container_name: nginx_protected
-    #     volumes:
-    #         - ./nginx:/usr/share/nginx/html 
-    #     labels:
-    #         - "traefik.http.routers.nginx.rule=Host(`localhost`)"
-    #         - "traefik.http.services.nginx.loadbalancer.server.port=80"
-    #         - "traefik.http.middlewares.auth-mv.forwardauth.address=http://auth:8000/"
-    #         - "traefik.http.routers.nginx.middlewares=auth-mv@docker"
-
-    events:
-        container_name: events
-        build: ./events
+    rabbitmq:
+        image: rabbitmq:management-alpine
+        container_name: rabbitmq
+        restart: always
         ports:
-            - "8001:8000"
-        labels:
-            - "traefik.http.routers.events.rule=Host(`localhost`) && PathPrefix(`/events`)"
-            - "traefik.http.services.events.loadbalancer.server.port=8000"
-            - "traefik.http.middlewares.auth-mv.forwardauth.address=http://auth:8000/"
-            - "traefik.http.routers.events.middlewares=auth-mv@docker"
+            - 5672:5672
+            - 15672:15672
+        
+    
 
 
-volumes:
-    my_db_data:
+include:
+    - path: ./auth/docker-compose.yml
+    - path: ./events/docker-compose.yml

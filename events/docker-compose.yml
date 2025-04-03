@@ -1,0 +1,38 @@
+services:
+    events:
+        container_name: events
+        build: .
+        ports:
+            - "8001:8000"
+        labels:
+            - "traefik.http.routers.events.rule=Host(`localhost`) && PathPrefix(`/events`)"
+            - "traefik.http.services.events.loadbalancer.server.port=8000"
+            - "traefik.http.middlewares.auth-mv.forwardauth.address=http://auth:8000/"
+            - "traefik.http.routers.events.middlewares=auth-mv@docker"
+            - "traefik.http.middlewares.auth-mv.forwardauth.authResponseHeaders=X-User-Role"
+        depends_on:
+            events_db:
+                condition: service_healthy
+    
+    events_db:
+        image: postgres:alpine
+        container_name: events_db
+        restart: always
+        environment:
+            POSTGRES_USER: ${DB_USER}
+            POSTGRES_PASSWORD: ${DB_PASSWORD}
+            POSTGRES_DB: ${DB_NAME}
+        ports:
+            - ${DB_PORT}:5432
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 30s
+        volumes:
+            - pg_data:/var/lib/postgresql/data
+
+volumes:
+    pg_data:
+        driver: local
