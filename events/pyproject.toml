@@ -73,6 +73,7 @@ dev = [
         "node_modules",
         "site-packages",
         "venv",
+        "migration",
     ]
 
     line-length = 130

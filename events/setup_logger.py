@@ -2,7 +2,7 @@ from enum import StrEnum
 import logging
 
 
-LOG_LEVEL = logging.WARNING
+LOG_LEVEL = logging.DEBUG
 LOG_FORMAT_DEBUG = "%(levelname)s:%(message)s:%(pathname)s:%(funcName)s:%(lineno)d"
 
 
@@ -12,18 +12,25 @@ class LogLevels(StrEnum):
     error = "ERROR"
     debug = "DEBUG"
 
-def configure_logging():
-    log_level = str(LOG_LEVEL).upper()
-    log_levels = list(LogLevels)
+LOG_LEVEL_MAPPING = {
+    LogLevels.debug: logging.DEBUG,
+    LogLevels.info: logging.INFO,
+    LogLevels.warning: logging.WARNING,
+    LogLevels.error: logging.ERROR
+}
 
-    if log_level not in log_levels:
-        logging.basicConfig(level=LogLevels.error)
-        return
+def configure_logging():
+    log_level_name = logging.getLevelName(LOG_LEVEL)
+
+    try: 
+        log_level = LogLevels(log_level_name)
+        numeric_level = LOG_LEVEL_MAPPING[log_level]
+    except ValueError:
+        numeric_level = logging.ERROR
 
     if log_level == LogLevels.debug:
         logging.basicConfig(level=log_level, format=LOG_FORMAT_DEBUG)
-        return
-
-    logging.basicConfig(level=log_level)
+    else:
+        logging.basicConfig(level=numeric_level)
 
     logging.getLogger("slack_sdk.web.base_client").setLevel(logging.CRITICAL)
