@@ -19,29 +19,18 @@ router = APIRouter(prefix="/events", tags=["Events"])
 
 @router.post("")
 async def create_event(event_data: SEvent, request: Request, event_dao: Annotated[EventDAO, Depends(EventDAO)]) -> dict:
-    user_role = request.headers.get("X-User-Role")
-    if user_role == "admin":
-        return await create_event_handler(event_data, event_dao)
-
-    return status.HTTP_403_FORBIDDEN
+    return await create_event_handler(event_data, event_dao)
 
 
 @router.put("/{id}")
 async def update_event(id: int, request: Request, event_data: SEvent, event_dao: Annotated[EventDAO, Depends(EventDAO)]) -> dict:
-    user_role = request.headers.get("X-User-Role")
-    if user_role == "admin":
-        return await update_event_handler(id, event_data, event_dao)
-
-    return status.HTTP_403_FORBIDDEN
+    return await update_event_handler(id, event_data, event_dao)
 
 
 @router.delete("/{id}")
 async def delete_event_by_id(id: int, request: Request, event_dao: Annotated[EventDAO, Depends(EventDAO)]) -> dict:
-    user_role = request.headers.get("X-User-Role")
-    if user_role == "admin":
-        return await delete_event_handler(id, event_dao)
+    return await delete_event_handler(id, event_dao)
 
-    return status.HTTP_403_FORBIDDEN
 
 
 @router.get("/{id}")
@@ -54,7 +43,7 @@ async def get_event(
     event_dao: Annotated[EventDAO, Depends(EventDAO)],
     date_from: date = Query(...),
     date_to: date = Query(...),
-    page: int = Query(1, ge=1),
+    page: int = Query(0, ge=0),
     items_count: int = Query(20, ge=20, le=100)
 ):
     return await find_event_by_date(date_from, date_to, page, items_count, event_dao)
