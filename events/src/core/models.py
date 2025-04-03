@@ -19,6 +19,8 @@ class Event(Base):
     available_tickets: Mapped[int]
     ticket_price: Mapped[int]
 
+    delete_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
     def to_dict(self):
         return {
             "name": self.name,

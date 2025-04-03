@@ -13,6 +13,7 @@ sys.path.insert(0, dirname(dirname(__file__)))
 
 from config import get_db_uri
 from src.core.database import Base
+from src.core.models import Event
 
 
 # this is the Alembic Config object, which provides

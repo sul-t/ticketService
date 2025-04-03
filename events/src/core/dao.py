@@ -1,4 +1,5 @@
-from datetime import date
+from datetime import date, datetime
+import logging
 
 from fastapi import Depends
 from sqlalchemy import and_, delete, select, update
@@ -7,6 +8,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.database import Base, async_session
 from src.core.models import Event
+
+
+log = logging.getLogger(__name__)
 
 
 class EventDAO(Base):
@@ -22,7 +26,7 @@ class EventDAO(Base):
             return event_data
         except SQLAlchemyError as e:
             await self.session.rollback()
-            print(f"Ошибка добавления мероприятия: {e}")
+            log.error(f"Ошибка при создании мероприятия: {e}")
 
             return None
 
@@ -41,9 +45,10 @@ class EventDAO(Base):
             return None
 
 
-    async def delete_event(self, event_id: int) -> Event | None:
+    async def delete_event(self, event_id: int, delete_date: datetime) -> Event | None:
         try:
-            stmt = delete(Event).where(Event.id == event_id).returning(Event)
+            stmt = update(Event).where(Event.id == event_id).values(delete_at = delete_date).returning(Event)
+            # stmt = delete(Event).where(Event.id == event_id).returning(Event)
             result = await self.session.execute(stmt)
             await self.session.commit()
 
@@ -65,8 +70,8 @@ class EventDAO(Base):
     async def find_event_by_date(self, date_from: date, date_to: date, page: int, items_count: int):
         stmt = (
             select(Event)
-            .where(and_(Event.event_date > date_from, Event.event_date <= date_to, Event.available_tickets > 0))
-            .offset((page - 1) * items_count)
+            .where(and_(Event.event_date > date_from, Event.event_date <= date_to, Event.available_tickets > 0, Event.delete_at == None))
+            .offset((page) * items_count)
             .limit(items_count)
         )
 

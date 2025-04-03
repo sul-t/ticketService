@@ -2,8 +2,6 @@ services:
     events:
         container_name: events
         build: .
-        # command: >
-        #     sh -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
         ports:
             - "8001:8000"
         labels:
