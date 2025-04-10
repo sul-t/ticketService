@@ -12,7 +12,7 @@ async def test_create_event_happy_path(async_http_client: AsyncClient):
     event_data = {
         "name": 'Поднятие уровня в одиночку',
         "description": 'Сюжет будет построен на оригинальной манхве',
-        "event_date": datetime.now(),
+        "event_date": str(datetime.now()),
         "available_tickets": 150,
         "ticket_price": 1000
     }

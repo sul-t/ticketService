@@ -25,6 +25,7 @@ dependencies = [
     "types-passlib>=1.7.7.20250319",
     "types-python-jose>=3.4.0.20250224",
     "uvicorn>=0.34.0",
+    "yarl>=1.19.0",
 ]
 
 [tool.pytest.ini_options]
