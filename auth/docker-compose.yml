@@ -1,0 +1,23 @@
+services:
+    auth:
+        container_name: auth
+        build: .
+        ports:
+            - "8000:8000"
+        depends_on:
+            - mongodb
+
+    mongodb:
+        image: mongo:latest
+        container_name: auth_db
+        restart: always
+        ports:
+            - "${DB_PORT:-27017}:27017"
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
+            MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
+        volumes:
+            - my_db_data:/data/db
+
+volumes:
+    my_db_data:
