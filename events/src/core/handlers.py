@@ -1,6 +1,5 @@
+from datetime import UTC, date, datetime, time
 import logging
-
-from datetime import date, datetime, time, timezone
 
 from src.core.dao import EventDAO
 from src.core.models import Event, RmqAdapter
@@ -12,36 +11,37 @@ log = logging.getLogger(__name__)
 
 
 async def create_event_handler(event_data: SEvent, event_dao: EventDAO) -> dict:
-    log.info('Создание мероприятия...')
+    log.info("Создание мероприятия...")
 
     is_created = await event_dao.create_event(Event(**event_data.model_dump()))
 
     if is_created:
-        log.info('Мероприятие успешно создано')
+        log.info("Мероприятие успешно создано")
 
         return {
-            "ok": True, 
+            "ok": True,
             "data": {"message": "Мероприятие успешно создано"}
         }
 
 
     return {
-            "ok": False, 
+            "ok": False,
             "data": {"message": "Ошибка при создании мероприятия"}
         }
 
 
 async def update_event_handler(event_id: int, event_data: SEvent, event_dao: EventDAO) -> dict:
     event = await event_dao.find_event_by_id(event_id=event_id)
-    old_event_data = {
-        "available_tickets": event.available_tickets, 
-        "ticket_price": event.ticket_price
-    }
+    if event is not None:
+        old_event_data = {
+            "available_tickets": event.available_tickets,
+            "ticket_price": event.ticket_price
+        }
 
     event = await event_dao.update_event(event_id, event_data.model_dump())
     if event is None:
         return {
-            "ok": False, 
+            "ok": False,
             "data": {"message": "Ошибка при обновлении мероприятия"}
         }
 
@@ -70,7 +70,7 @@ async def update_event_handler(event_id: int, event_data: SEvent, event_dao: Eve
 
 
 async def delete_event_handler(event_id: int, event_dao: EventDAO) -> dict:
-    is_delete = await event_dao.delete_event(event_id, delete_date=datetime.now(timezone.utc).replace(tzinfo=None))
+    is_delete = await event_dao.delete_event(event_id, delete_date=datetime.now(UTC).replace(tzinfo=None))
 
     if not is_delete:
         return {
@@ -88,7 +88,7 @@ async def delete_event_handler(event_id: int, event_dao: EventDAO) -> dict:
         return {
             "ok": True,
             "data": {"message": "Мероприятие успешно удалено и деньги возвращены"}
-        } 
+        }
 
 
 async def find_event_by_id(event_id: int, event_dao: EventDAO) -> SEvent | dict:
@@ -109,7 +109,7 @@ async def find_event_by_id(event_id: int, event_dao: EventDAO) -> SEvent | dict:
     )
 
 
-async def find_event_by_date(date_from: date, date_to: date, page: int, items_count: int, event_dao: EventDAO):
+async def find_event_by_date(date_from: date, date_to: date, page: int, items_count: int, event_dao: EventDAO) -> dict | list[dict]:
     datetime.combine(date_from, time.min)
     datetime.combine(date_to, time.max)
 

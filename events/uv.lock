@@ -40,6 +40,15 @@ wheels = [
 ]
 
 [[package]]
+name = "asyncio"
+version = "3.4.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/da/54/054bafaf2c0fb8473d423743e191fcdf49b2c1fd5e9af3524efbe097bafd/asyncio-3.4.3.tar.gz", hash = "sha256:83360ff8bc97980e4ff25c964c7bd3923d333d177aa4f7fb736b019f26c7cb41", size = 204411 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/22/74/07679c5b9f98a7cb0fc147b1ef1cc1853bc07a4eb9cb5731e24732c5f773/asyncio-3.4.3-py3-none-any.whl", hash = "sha256:c4d18b22701821de07bd6aea8b53d21449ec0ec5680645e5317062ea21817d2d", size = 101767 },
+]
+
+[[package]]
 name = "asyncpg"
 version = "0.30.0"
 source = { registry = "https://pypi.org/simple" }
@@ -78,6 +87,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "alembic" },
+    { name = "asyncio" },
     { name = "asyncpg" },
     { name = "fastapi" },
     { name = "httpx" },
@@ -93,6 +103,7 @@ dependencies = [
     { name = "sqlalchemy" },
     { name = "testcontainers" },
     { name = "types-passlib" },
+    { name = "types-pika" },
     { name = "uvicorn" },
 ]
 
@@ -106,6 +117,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "alembic", specifier = ">=1.15.1" },
+    { name = "asyncio", specifier = ">=3.4.3" },
     { name = "asyncpg", specifier = ">=0.30.0" },
     { name = "fastapi", specifier = ">=0.115.11" },
     { name = "httpx", specifier = ">=0.28.1" },
@@ -121,6 +133,7 @@ requires-dist = [
     { name = "sqlalchemy", specifier = ">=2.0.39" },
     { name = "testcontainers", extras = ["postgres"], specifier = ">=4.10.0" },
     { name = "types-passlib", specifier = ">=1.7.7.20250319" },
+    { name = "types-pika", specifier = ">=1.2.0b1" },
     { name = "uvicorn", specifier = ">=0.34.0" },
 ]
 
@@ -811,6 +824,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/59/e4/6a79fc885c839442525fbf0630803cc7841edc53d535a29b6e004fc6195e/types_passlib-1.7.7.20250322.tar.gz", hash = "sha256:b10f95d80ec24e88f9d313e904e4d42f067f6614bc12eed958fe056f874ca0a8", size = 23898 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a7/b2/5cda1d5588a7ce351518add8a10052d42ba8cb2bb1169ea44e820ba4e7d0/types_passlib-1.7.7.20250322-py3-none-any.whl", hash = "sha256:0fd7a0105365a462486afbc0cc0c029faf00c2b537519684825b432fb98a9a27", size = 38622 },
+]
+
+[[package]]
+name = "types-pika"
+version = "1.2.0b1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/51/25/c23753b27713224afe48071b750f2ced8eae4402be2556a4d7509e059e2b/types-pika-1.2.0b1.tar.gz", hash = "sha256:338f56ced7cfe17bce5237764fb5561fb209be2ef7eb32712f58608f55b1dc5b", size = 16951 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/93/cd/bc18f1430defc72cf1fb144645721ee2161f5d9a9f5884db465e699b37f0/types_pika-1.2.0b1-py3-none-any.whl", hash = "sha256:d5522f5b17dbaf747e1a0e49dd0024c1656a5ffda890996daa40b43f824667bc", size = 24199 },
 ]
 
 [[package]]

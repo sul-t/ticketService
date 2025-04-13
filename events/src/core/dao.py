@@ -1,8 +1,9 @@
 from datetime import date, datetime
 import logging
+from typing import Sequence
 
 from fastapi import Depends
-from sqlalchemy import and_, delete, select, update
+from sqlalchemy import and_, select, update
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -67,10 +68,10 @@ class EventDAO(Base):
         return result.scalar_one_or_none()
 
 
-    async def find_event_by_date(self, date_from: date, date_to: date, page: int, items_count: int):
+    async def find_event_by_date(self, date_from: date, date_to: date, page: int, items_count: int) -> Sequence[Event]:
         stmt = (
             select(Event)
-            .where(and_(Event.event_date > date_from, Event.event_date <= date_to, Event.available_tickets > 0, Event.delete_at == None))
+            .where(and_(Event.event_date > date_from, Event.event_date <= date_to, Event.available_tickets > 0, Event.delete_at.is_(None)))
             .offset((page) * items_count)
             .limit(items_count)
         )

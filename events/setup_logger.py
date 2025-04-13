@@ -19,10 +19,10 @@ LOG_LEVEL_MAPPING = {
     LogLevels.error: logging.ERROR
 }
 
-def configure_logging():
+def configure_logging() -> None:
     log_level_name = logging.getLevelName(LOG_LEVEL)
 
-    try: 
+    try:
         log_level = LogLevels(log_level_name)
         numeric_level = LOG_LEVEL_MAPPING[log_level]
     except ValueError:

@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, Request, status
+from fastapi import APIRouter, Depends, Query
 
 from src.core.dao import EventDAO
 from src.core.handlers import (
@@ -18,17 +18,17 @@ router = APIRouter(prefix="/events", tags=["Events"])
 
 
 @router.post("")
-async def create_event(event_data: SEvent, request: Request, event_dao: Annotated[EventDAO, Depends(EventDAO)]) -> dict:
+async def create_event(event_data: SEvent, event_dao: Annotated[EventDAO, Depends(EventDAO)]) -> dict:
     return await create_event_handler(event_data, event_dao)
 
 
 @router.put("/{id}")
-async def update_event(id: int, request: Request, event_data: SEvent, event_dao: Annotated[EventDAO, Depends(EventDAO)]) -> dict:
+async def update_event(id: int, event_data: SEvent, event_dao: Annotated[EventDAO, Depends(EventDAO)]) -> dict:
     return await update_event_handler(id, event_data, event_dao)
 
 
 @router.delete("/{id}")
-async def delete_event_by_id(id: int, request: Request, event_dao: Annotated[EventDAO, Depends(EventDAO)]) -> dict:
+async def delete_event_by_id(id: int, event_dao: Annotated[EventDAO, Depends(EventDAO)]) -> dict:
     return await delete_event_handler(id, event_dao)
 
 
@@ -45,5 +45,5 @@ async def get_event(
     date_to: date = Query(...),
     page: int = Query(0, ge=0),
     items_count: int = Query(20, ge=20, le=100)
-):
+) -> dict | list[dict]:
     return await find_event_by_date(date_from, date_to, page, items_count, event_dao)
