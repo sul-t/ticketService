@@ -21,8 +21,7 @@ services:
             - 15672:15672
         
     
-
-
 include:
     - path: ./auth/docker-compose.yml
     - path: ./events/docker-compose.yml
+    - path: ./orders/docker-compose.yml
