@@ -40,4 +40,4 @@ async def signin(response: Response, user: SUserRegister, user_dao: Annotated[Us
 @router.get("/")
 async def check_jwt(response: Response, user: Annotated[User, Depends(get_current_user)]) -> str:
     response.headers["X-User-Role"] = user.role
-    return user.name
+    return user.id
