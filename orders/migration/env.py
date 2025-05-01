@@ -11,7 +11,7 @@ from alembic import context
 
 sys.path.insert(0, dirname(dirname(__file__)))
 
-from src.allocation.adapters.orm import Base, Ticket, Order
+from src.allocation.adapters.orm import Base
 from config import get_db_uri
 
 # this is the Alembic Config object, which provides

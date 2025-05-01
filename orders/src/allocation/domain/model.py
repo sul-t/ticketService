@@ -6,6 +6,7 @@ class OrderStatus(str, Enum):
     PAYMENT_PENDING = "payment_pending"
     REFUND = "refund"
     PARTIAL_REFUND = "partial_refund"
+    DONE = 'done'
 
 
 class TicketModel:
@@ -16,7 +17,8 @@ class TicketModel:
 
 
 class OrderModel:
-    def __init__(self, status: OrderStatus, user_id: int):
+    def __init__(self, status: OrderStatus, user_id: int, tickets: list[TicketModel]):
         self.status = status
         self.user_id = user_id
+        self.tickets = tickets
     
