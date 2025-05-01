@@ -15,7 +15,7 @@ class AbstractOrderRepository(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    async def delete_cart(self, user_id: int) -> None:
+    async def delete_cart(self, **filters: int | OrderStatus) -> bool:
         raise NotImplementedError
     
     @abstractmethod
@@ -31,9 +31,11 @@ class SqlAlchemyOrderRepository(AbstractOrderRepository):
         result = await self.session.execute(select(Order).filter_by(**filters))
         return result.scalar_one_or_none()
     
-    async def delete_cart(self, user_id: int) -> None:
-        stmt = delete(Order).filter_by(user_id=user_id)
-        await self.session.execute(stmt)
+    async def delete_cart(self, **filters: int | OrderStatus) -> bool:
+        stmt = delete(Order).filter_by(**filters)
+        result = await self.session.execute(stmt)
+
+        return result.rowcount > 0
     
     async def create_cart(self, order_orm: Order) -> Order:
         self.session.add(order_orm)

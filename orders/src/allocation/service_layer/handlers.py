@@ -43,11 +43,10 @@ async def update(cmd: UpdateCartRequest, uow: AbstractUnitOfWork) -> dict:
 
 async def delete(user_id: int, uow: AbstractUnitOfWork) -> dict:
     async with uow:
-        order_orm = await uow.orders.get(user_id=user_id, order_status=OrderStatus.CREATED)
-        if not order_orm:
+        cart = await uow.orders.delete_cart(user_id=user_id, order_status=OrderStatus.CREATED)
+        if not cart:
             return {'ok': False, 'data': 'У пользователя нет корзины'}
         
-        await uow.orders.delete_cart(order_orm.user_id)
         await uow.commit()
 
         return {'ok': True, 'data': 'Корзина была полностью очищена'}

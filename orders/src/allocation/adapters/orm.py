@@ -21,12 +21,12 @@ class Order(Base):
     order_status: Mapped[OrderStatus] = mapped_column(Enum(OrderStatus, native_enum=False))
     user_id: Mapped[int]
 
-    tickets = relationship('Ticket', back_populates='order', cascade="all, delete-orphan")
+    tickets = relationship('Ticket', back_populates='order', cascade="all, delete-orphan", passive_deletes=True)
 
 class Ticket(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     event_id: Mapped[int] = mapped_column(Integer)
-    order_id: Mapped[int] = mapped_column(ForeignKey('orders.id'))
+    order_id: Mapped[int] = mapped_column(ForeignKey('orders.id', ondelete="CASCADE"))
     price: Mapped[int]
 
     order = relationship('Order', back_populates='tickets')
