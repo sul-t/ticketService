@@ -1,5 +1,3 @@
-import os
-
 import dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -11,6 +9,9 @@ class Setting(BaseSettings):
     DB_USER: str
     DB_PASSWORD: str
     RABBITMQ_HOST: str
+
+    print(dotenv.find_dotenv())
+    print(dotenv.dotenv_values(dotenv_path=dotenv.find_dotenv()))
 
     model_config = SettingsConfigDict(env_file=dotenv.find_dotenv())
 
