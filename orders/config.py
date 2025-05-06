@@ -16,7 +16,7 @@ class Setting(BaseSettings):
 settings = Setting()
 
 
-def get_db_uri():
+def get_db_uri() -> str:
     return (
         f"postgresql+asyncpg://{settings.DB_USER}:{settings.DB_PASSWORD}@"
         f"{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"

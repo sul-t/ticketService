@@ -1,3 +1,5 @@
+from typing import Sequence
+
 from sqlalchemy import Enum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase, declared_attr, relationship
 from sqlalchemy.types import Integer
@@ -16,14 +18,18 @@ class Base(DeclarativeBase, AsyncAttrs):
 
 class Order(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    order_status: Mapped[OrderStatus] = mapped_column(Enum(OrderStatus))
+    order_status: Mapped[OrderStatus] = mapped_column(Enum(OrderStatus, native_enum=False))
     user_id: Mapped[int]
+
+    tickets = relationship('Ticket', back_populates='order', cascade="all, delete-orphan", passive_deletes=True)
 
 class Ticket(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     event_id: Mapped[int] = mapped_column(Integer)
-    order_id: Mapped[int] = mapped_column(ForeignKey('orders.id'))
+    order_id: Mapped[int] = mapped_column(ForeignKey('orders.id', ondelete="CASCADE"))
     price: Mapped[int]
+
+    order = relationship('Order', back_populates='tickets')
 
     def to_dict(self) -> dict:
         return {
@@ -36,15 +42,15 @@ class Ticket(Base):
 def convert_order_to_orm(order: OrderModel) -> Order:
     return Order(
         order_status = order.status,
-        user_id = order.user_id
+        user_id = order.user_id,
+        tickets = order.tickets
     )
 
-def convert_orm_to_order(order_orm: Order, tickets: TicketModel) -> OrderModel:
+def convert_orm_to_order(order_orm: Order) -> OrderModel:
     return OrderModel(
-        id = order_orm.id,
         status = order_orm.order_status,
         user_id = order_orm.user_id,
-        ticket_model = tickets
+        tickets = order_orm.tickets
     )
 
 
@@ -62,11 +68,10 @@ def convert_orm_to_ticket(ticket_orm: Ticket) -> TicketModel:
         price = ticket_orm.price
     )
 
-def convert_to_dict_cart(order, tickets) -> dict:
+def serialize_order_data(tickets: Sequence[Ticket]) -> dict:
     return {
-        "id": order.id,
-        "status": order.order_status,
-        "user_id": order.user_id,
+        "status": tickets[0].order.order_status,
+        "user_id": tickets[0].order.user_id,
         "tickets": [{
                 "id": t.id,
                 "event_id": t.event_id, 

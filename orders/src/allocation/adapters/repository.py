@@ -1,23 +1,25 @@
 from abc import ABC, abstractmethod
+from typing import Sequence
 
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
-from src.allocation.domain.model import OrderModel, TicketModel
-from src.allocation.adapters.orm import convert_order_to_orm, Order, Ticket
+from src.allocation.domain.model import OrderStatus
+from src.allocation.adapters.orm import Order, Ticket
 
 
-class AbstractOrderRepository(ABC):
+class AbstractOrderRepository(ABC):    
     @abstractmethod
-    async def add(self, order: OrderModel):
+    async def get(self, **filters: int | OrderStatus) -> Order| None:
         raise NotImplementedError
     
     @abstractmethod
-    async def get(self, user_id: int) -> OrderModel:
+    async def delete_cart(self, **filters: int | OrderStatus) -> bool:
         raise NotImplementedError
     
     @abstractmethod
-    async def delete(self, user_id: int):
+    async def create_cart(self, order_orm: Order) -> Order:
         raise NotImplementedError
     
 
@@ -25,34 +27,34 @@ class SqlAlchemyOrderRepository(AbstractOrderRepository):
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def add(self, order: OrderModel): 
-        order_orm = convert_order_to_orm(order)
-        self.session.add(order_orm)
-        await self.session.flush()
-
-        return order_orm
-
-    async def get(self, user_id: int) -> OrderModel:
-        result = await self.session.execute(select(Order).filter_by(user_id=user_id))
+    async def get(self, **filters: int | OrderStatus) -> Order | None:
+        result = await self.session.execute(select(Order).filter_by(**filters))
         return result.scalar_one_or_none()
     
-    async def delete(self, user_id):
-        stmt = delete(Order).filter_by(user_id=user_id).returning(Order.id)
-        return await self.session.execute(stmt)
+    async def delete_cart(self, **filters: int | OrderStatus) -> bool:
+        stmt = delete(Order).filter_by(**filters)
+        result = await self.session.execute(stmt)
 
+        return result.rowcount > 0
+    
+    async def create_cart(self, order_orm: Order) -> Order:
+        self.session.add(order_orm)
 
+        return order_orm
+    
+    
 
 class AbstractTicketRepository(ABC):
     @abstractmethod
-    async def add_all(self, tickets_data: list[dict]):
+    async def add_all(self, tickets_data: list[dict]) -> list[Ticket]:
         raise NotImplementedError
     
     @abstractmethod
-    async def get(self, order_id: int) -> list[TicketModel]:
+    async def delete(self, order_id: int) -> None:
         raise NotImplementedError
     
     @abstractmethod
-    async def delete(self, order_id: int):
+    async def get_tickets_by_filter(self, **filters: int | OrderStatus) -> Sequence[Ticket]:
         raise NotImplementedError
 
 
@@ -60,7 +62,7 @@ class SqlAlchemyTicketRepository(AbstractTicketRepository):
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def add_all(self, tickets_data: list[dict]):
+    async def add_all(self, tickets_data: list[dict]) -> list[Ticket]:
         tickets_orm = [Ticket(**ticket_data) for ticket_data in tickets_data]
 
         self.session.add_all(tickets_orm)
@@ -68,12 +70,12 @@ class SqlAlchemyTicketRepository(AbstractTicketRepository):
 
         return tickets_orm
     
-    async def get(self, order_id):
-        result = await self.session.execute(select(Ticket).filter_by(order_id=order_id))
+    async def delete(self, order_id: int) -> None:
+        stmt = delete(Ticket).filter_by(order_id=order_id)
+        await self.session.execute(stmt)
+    
+    async def get_tickets_by_filter(self, **filters: int | OrderStatus) -> Sequence[Ticket]:
+        stmt = select(Ticket).join(Order).filter_by(**filters).options(joinedload(Ticket.order))
+        result = await self.session.execute(stmt)
 
         return result.scalars().all()
-    
-    async def delete(self, order_id):
-        stmt = delete(Ticket).filter_by(order_id=order_id)
-        return await self.session.execute(stmt)
-    
