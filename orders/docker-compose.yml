@@ -1,0 +1,38 @@
+services:
+    orders:
+        container_name: orders
+        build: .
+        ports:
+            - 8002:8000
+        labels:
+            - "traefik.http.routers.orders.rule=Host(`localhost`) && PathPrefix(`/orders`)"
+            - "traefik.http.services.orders.loadbalancer.server.port=8000"
+            - "traefik.http.middlewares.auth-mv.forwardauth.address=http://auth:8000/"
+            - "traefik.http.routers.orders.middlewares=auth-mv@docker"
+            - "traefik.http.middlewares.auth-mv.forwardauth.authResponseHeaders=X-User-Role"
+        depends_on:
+            orders_db:
+                condition: service_healthy
+
+    orders_db:
+        image: postgres:alpine
+        container_name: orders_db
+        restart: always
+        environment:
+            POSTGRES_USER: ${DB_USER}
+            POSTGRES_PASSWORD: ${DB_PASSWORD}
+            POSTGRES_DB: ${DB_NAME}
+        # ports:
+        #     - ${DB_PORT}:$5432
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 30s
+        volumes:
+            - pg_data_orders:/var/lib/postgresql/data
+
+volumes:
+    pg_data_orders:
+        driver: local

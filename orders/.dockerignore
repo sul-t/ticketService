@@ -1,0 +1,16 @@
+.venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.vscode/
+.github/
+
+__pycache__/
+
+mypy.ini
+Makefile
+docker-composee.yml
+Dockerfile
+.gitignore
+README.md
+
