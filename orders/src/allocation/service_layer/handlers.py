@@ -6,21 +6,21 @@ from src.allocation.adapters.orm import serialize_order_data, convert_order_to_o
 
 async def add(user_id: int, uow: AbstractUnitOfWork) -> list[dict]:
     async with uow:
-        tickets = await uow.tickets.get_tickets_by_filter(user_id=user_id, order_status=OrderStatus.CREATED)
-        if not tickets:
+        cart = await uow.tickets.get_tickets_by_filter(user_id=user_id, order_status=OrderStatus.CREATED)
+        if not cart:
             order = OrderModel(status=OrderStatus.CREATED, user_id=user_id, tickets=[])
     
-            await uow.orders.create_cart(convert_order_to_orm(order))
+            cart = await uow.orders.create_cart(convert_order_to_orm(order))
             await uow.commit()
 
-        tickets_dict = [ticket.to_dict() for ticket in tickets]
+        tickets_dict = [ticket.to_dict() for ticket in cart]
 
         return tickets_dict
     
 
-async def update(cmd: UpdateCartRequest, uow: AbstractUnitOfWork) -> dict:
+async def update(cmd: UpdateCartRequest, user_id: str, uow: AbstractUnitOfWork) -> dict:
     async with uow:
-        order_orm = await uow.orders.get(user_id=cmd.user_id, order_status=OrderStatus.CREATED)
+        order_orm = await uow.orders.get(user_id=user_id, order_status=OrderStatus.CREATED)
         if order_orm is None:
             return {'ok': False, 'data': 'Корзины не существует'}
 

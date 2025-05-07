@@ -19,7 +19,7 @@ class Base(DeclarativeBase, AsyncAttrs):
 class Order(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     order_status: Mapped[OrderStatus] = mapped_column(Enum(OrderStatus, native_enum=False))
-    user_id: Mapped[int]
+    user_id: Mapped[str]
 
     tickets = relationship('Ticket', back_populates='order', cascade="all, delete-orphan", passive_deletes=True)
 

@@ -10,6 +10,5 @@ class CartTicketItem(Command):
 
 
 class UpdateCartRequest(BaseModel):
-    user_id: int
     tickets: list[CartTicketItem]
 
