@@ -11,6 +11,9 @@ services:
             - "8080:8080"
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
+        labels:
+            - "traefik.http.middlewares.auth-mv.forwardauth.address=http://auth:8000/"
+            - "traefik.http.middlewares.auth-mv.forwardauth.authResponseHeaders=X-User-Role, User-ID"
 
     rabbitmq:
         image: rabbitmq:management-alpine

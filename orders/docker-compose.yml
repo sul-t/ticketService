@@ -5,11 +5,10 @@ services:
         ports:
             - 8002:8000
         labels:
-            - "traefik.http.routers.orders.rule=Host(`localhost`) && PathPrefix(`/orders`)"
+            - "traefik.http.routers.orders.rule=PathPrefix(`/orders`)"
             - "traefik.http.services.orders.loadbalancer.server.port=8000"
-            - "traefik.http.middlewares.auth-mv.forwardauth.address=http://auth:8000/"
             - "traefik.http.routers.orders.middlewares=auth-mv@docker"
-            - "traefik.http.middlewares.auth-mv.forwardauth.authResponseHeaders=X-User-Role"
+            
         depends_on:
             orders_db:
                 condition: service_healthy

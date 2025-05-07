@@ -5,11 +5,9 @@ services:
         ports:
             - "8001:8000"
         labels:
-            - "traefik.http.routers.events.rule=Host(`localhost`) && PathPrefix(`/events`)"
+            - "traefik.http.routers.events.rule=PathPrefix(`/events`)"
             - "traefik.http.services.events.loadbalancer.server.port=8000"
-            - "traefik.http.middlewares.auth-mv.forwardauth.address=http://auth:8000/"
             - "traefik.http.routers.events.middlewares=auth-mv@docker"
-            - "traefik.http.middlewares.auth-mv.forwardauth.authResponseHeaders=X-User-Role"
         depends_on:
             events_db:
                 condition: service_healthy
